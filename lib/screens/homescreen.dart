@@ -13,6 +13,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Uint8List? imageBytes;
 
+  // Sidebar saved thumbnails list
+  List<Uint8List> savedImages = [];
+
+  // PICK IMAGE
   Future<void> pickImage() async {
     final image = await ImagePickerWeb.getImageAsBytes();
     setState(() {
@@ -20,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  // CAPTURE IMAGE
   Future<void> captureImage() async {
     final result = await Navigator.push(
       context,
@@ -35,10 +40,20 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  // RESET CURRENT IMAGE
   void resetImage() {
     setState(() {
       imageBytes = null;
     });
+  }
+
+  // SAVE IMAGE TO SIDEBAR
+  void saveImageToSidebar() {
+    if (imageBytes != null) {
+      setState(() {
+        savedImages.add(imageBytes!);
+      });
+    }
   }
 
   @override
@@ -46,7 +61,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      /// 🔹 TOP APP BAR
       appBar: AppBar(
         backgroundColor: Colors.grey.shade700,
         centerTitle: true,
@@ -60,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Row(
         children: [
           // ---------------------------------------------------------------
-          // 🔹 LEFT SIDEBAR (Scroll when images increase)
+          // 🔹 LEFT SIDEBAR — scrollable saved images
           // ---------------------------------------------------------------
           Container(
             width: 200,
@@ -79,14 +93,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
-                      children: List.generate(
-                        10,
-                        (index) => Container(
-                          margin: const EdgeInsets.all(8),
-                          height: 120,
-                          color: Colors.white,
-                        ),
-                      ),
+                      children: [
+                        for (var img in savedImages)
+                          Container(
+                            margin: const EdgeInsets.all(8),
+                            height: 120,
+                            width: 150,
+                            color: Colors.white,
+                            child: Image.memory(img, fit: BoxFit.cover),
+                          ),
+                      ],
                     ),
                   ),
                 ),
@@ -95,12 +111,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           // ---------------------------------------------------------------
-          // 🔹 CENTER CANVAS SECTION
+          // 🔹 CENTER CANVAS AREA
           // ---------------------------------------------------------------
           Expanded(
             child: Column(
               children: [
-                // MAIN IMAGE CANVAS
+                // Main canvas
                 Expanded(
                   child: Container(
                     color: Colors.grey.shade200,
@@ -117,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-                // BUTTON ROW
+                // Upload / Capture buttons
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40),
                   child: Row(
@@ -137,13 +153,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 const SizedBox(height: 10),
 
+                // Save / Reset buttons
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       ElevatedButton(
-                        onPressed: () {},
+                        onPressed: saveImageToSidebar,
                         child: const Text("Save Image"),
                       ),
                       ElevatedButton(
@@ -156,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 const SizedBox(height: 10),
 
-                // MODEL DROPDOWN
+                // ML Model Dropdown
                 Container(
                   margin: const EdgeInsets.all(15),
                   padding: const EdgeInsets.all(15),
@@ -171,6 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 10),
+
                       Container(
                         padding:
                             const EdgeInsets.symmetric(horizontal: 10),
@@ -197,14 +215,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           // ---------------------------------------------------------------
-          // 🔹 RIGHT PANEL (Class Labels + Annotations)
+          // 🔹 RIGHT PANEL — Class Labels + Annotations
           // ---------------------------------------------------------------
           Container(
             width: 250,
             color: Colors.grey.shade200,
             child: Column(
               children: [
-                // CLASS LABELS
+                // Class labels
                 const Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Text(
@@ -218,17 +236,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: List.generate(
                     4,
                     (index) => Container(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 5),
+                      margin:
+                          const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                       height: 35,
                       color: Colors.white,
                     ),
                   ),
                 ),
 
-                const Divider(thickness: 1),
+                const Divider(),
 
-                // ANNOTATIONS LIST
+                // Annotation items
                 const Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Text(
@@ -243,15 +261,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: EdgeInsets.zero,
                     itemCount: 10,
                     itemBuilder: (context, index) => Container(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 6),
+                      margin:
+                          const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                       height: 35,
                       color: Colors.white,
                     ),
                   ),
                 ),
 
-                // TRAIN BUTTON
+                // TRAIN button
                 Container(
                   margin: const EdgeInsets.all(10),
                   height: 50,
